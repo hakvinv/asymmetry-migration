@@ -4,14 +4,14 @@
 
 Hakvin Vosteen · Universität Bremen · 2026
 
-[![Paper](https://img.shields.io/badge/SSRN-Working%20Paper-blue)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=XXXXXXX)
+[![Paper](https://img.shields.io/badge/SSRN-Working%20Paper-blue)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6415318)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
 ## What this paper does
 
-Mandatory disclosure regulation (like the EU's CSRD) is designed to reduce information asymmetry. We show it works like a waterbed: push down in one place, the problem surfaces somewhere else.
+Mandatory disclosure regulation (like the EU' CSRD) is designed to reduce information asymmetry. We show it works like a waterbed: push down in one place, the problem surfaces somewhere else.
 
 We formalize this with a **graph-Laplacian diffusion model** where information asymmetry is a field on an institutional graph, regulation is a source term, and migration follows the graph's eigenmodes with empirically measurable relaxation times.
 

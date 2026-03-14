@@ -1,0 +1,525 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{setspace}
+
+\geometry{left=3.2cm, right=3.2cm, top=2.8cm, bottom=2.8cm}
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\pagestyle{plain}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+
+\newcommand{\email}[1]{\texttt{#1}}
+
+\begin{document}
+
+{\small\scshape paper}
+
+\vspace{0.8cm}
+
+{\LARGE The Regulatory Waterbed\\[4pt]
+Why Mandatory Disclosure Moves Information\\[4pt]
+Asymmetry Instead of Removing It}
+
+\vspace{0.7cm}
+
+Hakvin Vosteen$^{1}$
+
+\vspace{0.3cm}
+
+{\small $^1$Universit\"at Bremen, Faculty of Business Studies and Economics, Bremen, Germany}
+
+\vspace{0.3cm}
+
+{\small \textbf{E-mail:} \email{vosteen@uni-bremen.de}}
+
+\vspace{0.6cm}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\textbf{Abstract}
+
+\vspace{0.2em}
+
+Mandatory disclosure regulation is designed to reduce information asymmetry between firms and investors. This paper argues that it works like a waterbed: push down in one place, and the problem surfaces somewhere else. I formalize this as the \textit{Asymmetry Migration Principle} using a graph-Laplacian diffusion model: information asymmetry is a field on an institutional graph, regulation is a source term, and migration follows the graph's eigenmodes with empirically measurable relaxation times. Applied to the EU Corporate Sustainability Reporting Directive (CSRD), the framework identifies three migration channels---audit, supply chain, and processing---and predicts their activation sequence and speed.
+
+Using bibliometric data from OpenAlex (2015--2025, $N = 114{,}000+$ papers, live API query March 2026) and KPMG survey data, I calibrate the model and find three timescales spanning an order of magnitude: the processing layer relaxes in $\sim$1 year ($\lambda = 1.0$), supply chains in $\sim$11 years ($\lambda = 0.09$), and audit institutions in $\sim$14 years ($\lambda = 0.07$). ESG rating disagreement is growing faster than disclosure research (Welch $t = -4.1$, $p = 0.008$), sustainability assurance research has grown by 502\% since 2020 ($\rho = 0.98$), and the KPMG readiness gap shows the system becoming 33\% stuckier post-CSRD (disclosure at 77\%, audit readiness at 29\%). The framework reconciles the contradictory findings of Krueger et al.\ (2024) and Boulton (2024)---both measure different nodes of the same graph. A partially falsified arrival-time prediction leads to a refined decomposition: inherited asymmetry (pre-existing) versus triggered asymmetry (regulation-induced).
+
+\vspace{0.4em}
+
+{\small\textbf{Keywords:} regulatory waterbed, information asymmetry, CSRD, ESG disclosure, graph Laplacian, asymmetry migration, sustainability reporting, spectral gap}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{0.5cm}
+
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+% ============================================================
+
+In 2024, two research teams published findings on the same question: Does mandatory ESG disclosure reduce information asymmetry? Krueger, Sautner, Tang, and Zhong (2024), in the \textit{Journal of Accounting Research}, found that it does. Boulton (2024) found that it does not. Both used rigorous methods. Both used credible data. Both passed peer review at top outlets.
+
+They cannot both be right---or can they?
+
+This paper argues that they can. The contradiction dissolves once we recognize that information asymmetry is not a single quantity that rises or falls, but a \textit{distributed quantity} that moves through the system. Krueger et al.\ measure the regulated domain: firm-level sustainability reporting. There, asymmetry falls. Boulton (2024) measures adjacent domains: audit quality, data reliability, investor processing. There, asymmetry rises. Both are correct. They are simply looking at different rooms of the same house.
+
+The mechanism is simple and physical. Push down on a waterbed, and the water does not disappear. It moves. Regulate one dimension of information asymmetry, and the disorder migrates to the dimensions you did not regulate. I call this the \textit{Asymmetry Migration Principle}, and it generates precise predictions about \textit{where} the asymmetry goes, \textit{when} it arrives, and \textit{why} regulators consistently underestimate the system-wide effects of their interventions.
+
+The application is the European Union's Corporate Sustainability Reporting Directive (CSRD)---the largest mandatory disclosure regime in history, covering approximately 50,000 firms. The CSRD standardizes sustainability metrics, mandates third-party assurance, and introduces machine-readable reporting. By design, it compresses information asymmetry at the firm-reporting level. By consequence, it opens three doors through which asymmetry escapes.
+
+\textit{Door 1: The Audit Layer.} Assurance providers are hired and paid by the firms they audit. The initial standard is ``limited assurance''---the auditor certifies the \textit{absence} of contradictory evidence, not the \textit{presence} of supporting evidence. The same Big Four firms that advise on CSRD implementation also audit the results. The asymmetry between what is reported and what is true migrates from the firm to the auditor.
+
+\textit{Door 2: The Supply Chain.} Scope-3 emissions---typically 70--90\% of a firm's total footprint---depend on non-EU suppliers who are not subject to ESRS. European firms must report numbers they cannot verify. The result is pseudo-precision: data that looks measured but is estimated, with errors that compound multiplicatively across supply chain tiers.
+
+\textit{Door 3: The Processing Layer.} A CSRD-compliant report may exceed 200 pages. Institutional investors with Bloomberg terminals and ESG teams can process this; retail investors cannot. Intermediaries---ESG rating agencies, index providers---emerge to bridge the gap, but their methodologies are proprietary and their assessments diverge wildly: Berg, K\"olbel, and Rigobon (2022) show cross-rater correlations of approximately $$r = 0.54$$, compared to $r > 0.95$ for credit ratings.
+
+None of this is a failure of the CSRD. It is a \textit{property} of bounded interventions in complex informational systems. The contribution of this paper is to formalize this property as a general principle and to derive testable predictions from it. The question for regulators is not ``Have we reduced asymmetry?'' but ``Where did we send it?''
+
+The paper is organized as follows. Section~\ref{sec:theory} develops the theoretical framework, defining the graph-Laplacian model and proving the migration principle. Section~\ref{sec:csrd} applies the framework to the CSRD's three migration pathways. Section~\ref{sec:empirics} tests the predictions using bibliometric data, calibrates the model, and derives the inherited-versus-triggered decomposition. Section~\ref{sec:predictions} derives testable predictions. Section~\ref{sec:implications} discusses regulatory design implications. Section~\ref{sec:literature} relates the framework to the existing literature. Section~\ref{sec:boundaries} acknowledges limitations.
+
+
+% ============================================================
+\section{Theoretical Framework}
+\label{sec:theory}
+% ============================================================
+
+\subsection{The Blind Spot: Where Does the Disorder Go?}
+
+The information economics of disclosure regulation rests on three pillars: Akerlof's adverse selection (1970), Spence's signaling (1973), and Verrecchia's disclosure theory (1983, 2001). In Verrecchia's framework, firms strategically withhold unfavorable information; mandatory disclosure eliminates this option and thereby reduces asymmetry.
+
+These models share a critical feature: they analyze \textit{equilibria}. The question is always ``What is the new state after regulation?'' never ``What happens to the disorder that was removed?'' This is like analyzing a game of chess by looking only at the final position, never at the moves. The moves are where the action is.
+
+The blind spot is this: classical models treat information asymmetry as a quantity that can be destroyed. Mandatory disclosure ``eliminates'' the silence equilibrium. Screening ``separates'' the types. But the second law of thermodynamics---and its information-theoretic analogue---tells us that order in one subsystem must be purchased with disorder in another. Shannon (1948) formalized this: information is conserved in closed systems; it can be transformed but not destroyed.
+
+Financial markets are not closed systems, but they are \textit{bounded} systems. Regulatory interventions have finite scope, finite enforcement capacity, and finite bandwidth. Within these bounds, asymmetry cannot be eliminated; it can only be redistributed.
+
+The idea that regulation displaces rather than eliminates problems has a rich history. In price regulation, the ``waterbed effect'' describes how capping one price causes others to rise (Genakos and Valletti 2011; Schiff 2008). In disclosure regulation, Manne (2007) proposed a ``hydraulic theory'' in which mandatory disclosure induces behavioral substitution into less observable domains. Leuz and Wysocki (2016) document that firms respond to disclosure mandates with avoidance strategies (going private, delisting, selective compliance). The present paper extends this displacement logic from prices and behaviors to \textit{information asymmetry itself}, and provides a formal framework---the screening operator---that generates testable predictions about the direction and timing of migration.
+
+\subsection{The Asymmetry Field on an Institutional Graph}
+
+I model the informational state of the market as a field $\phi_i(t)$ on the nodes of an institutional graph $G = (V, E, \gamma)$, where $V = \{1, \ldots, n\}$ are informational domains, $E$ are institutional linkages between them, and $\gamma_{ij} \geq 0$ are coupling strengths that measure how easily asymmetry flows from domain $i$ to domain $j$.
+
+\begin{definition}[Information Asymmetry Field]
+\label{def:field}
+The information asymmetry field $\phi_i(t)$ on domain $i$ at time $t$ measures the gap between reported and actual information quality. Its dynamics are governed by:
+\begin{equation}
+\frac{\partial \phi_i}{\partial t} = -\sum_{j} L_{ij}\, \phi_j(t) \;+\; S_i(t),
+\label{eq:laplacian}
+\end{equation}
+where $L = D - A$ is the graph Laplacian, $D = \mathrm{diag}(\sum_j \gamma_{ij})$ is the degree matrix, $A = (\gamma_{ij})$ is the weighted adjacency matrix, and $S_i(t)$ is the regulatory source term that injects or removes asymmetry from domain $i$.
+\end{definition}
+
+Equation~\eqref{eq:laplacian} is a diffusion equation on a graph (Chung 1997). Its structure implies a key property: the Laplacian $L$ has a zero eigenvalue $\lambda_0 = 0$ with constant eigenvector, meaning that \textit{total asymmetry is conserved} in the absence of external sources. Regulation ($S_i < 0$ for the regulated domain) reduces asymmetry locally, but the Laplacian term redistributes it to adjacent domains---precisely the waterbed mechanism.
+
+\begin{proposition}[Local Stabilization]
+\label{prop:local}
+A regulatory intervention that sets $S_i(t) < 0$ in the regulated domain $i$ reduces $\phi_i$ locally:
+\begin{equation}
+\frac{\partial \phi_i}{\partial t}\bigg|_{S_i < 0} < 0 \quad \text{(initially)}.
+\end{equation}
+This is the result that Krueger et al.\ (2024) measure within the firm-reporting domain.
+\end{proposition}
+
+\begin{proposition}[Asymmetry Migration Principle]
+\label{prop:migration}
+For any node $j$ adjacent to the regulated domain with $\gamma_{ij} > 0$:
+\begin{equation}
+\phi_i \downarrow \;\implies\; \frac{\partial \phi_j}{\partial t} = \gamma_{ij}(\phi_i - \phi_j) + \ldots > 0 \quad \text{if}\;\; \phi_i < \phi_j.
+\end{equation}
+However, as the regulated domain $\phi_i$ drops below its neighbors, the gradient reverses and asymmetry diffuses \textit{into} adjacent domains even without direct regulatory action on $j$. The direction of migration follows the gradient $\nabla\phi$ on the graph---from high to low asymmetry---which regulation inverts locally.
+\end{proposition}
+
+\begin{corollary}[Krueger-Boulton Reconciliation]
+Krueger et al.\ (2024) and Boulton (2024) measure different nodes of the same graph:
+\begin{equation}
+\underbrace{\phi_{\text{firm}}(t) \downarrow}_{\text{Krueger et al.}} \quad \text{while} \quad \underbrace{\phi_{\text{audit}}, \phi_{\text{supply}}, \phi_{\text{process}} \uparrow}_{\text{Boulton (2024)}}
+\end{equation}
+Both are consequences of Eq.~\eqref{eq:laplacian}: the Laplacian couples all nodes, so compressing one domain inflates its neighbors.
+\end{corollary}
+
+\subsection{How Fast Does the Water Move?}
+
+The general solution of Eq.~\eqref{eq:laplacian} decomposes into eigenmodes of the Laplacian. For a graph with eigenvalues $0 = \lambda_0 \leq \lambda_1 \leq \ldots \leq \lambda_n$ and eigenvectors $v_k$, the homogeneous solution is:
+\begin{equation}
+\phi_i(t) = \sum_{k=0}^{n} c_k \, v_k^{(i)} \, e^{-\lambda_k t},
+\label{eq:eigenmodes}
+\end{equation}
+where $c_k$ are set by initial conditions. Each eigenmode decays with characteristic time $\tau_k = 1/\lambda_k$. The \textit{spectral gap} $\lambda_1$ determines the slowest relaxation: larger $\lambda_1$ means the system equilibrates faster; smaller $\lambda_1$ means asymmetry persists longer.
+
+With a regulatory source $S_i(t)$ that activates as a sigmoid at time $t_0$, the full solution for each domain combines two components:
+\begin{equation}
+\phi_i(t) = \underbrace{\phi_i^{(0)} \, e^{-\lambda_i^{\text{eff}} t}}_{\text{inherited}} \;+\; \underbrace{A_i \cdot \sigma(t - t_0)}_{\text{triggered}},
+\label{eq:decomposition}
+\end{equation}
+where $\phi_i^{(0)}$ is the pre-existing asymmetry (initial condition), $\lambda_i^{\text{eff}}$ is the effective decay rate for domain $i$, $A_i$ is the source amplitude, and $\sigma(\cdot)$ is a sigmoid activation. This decomposition---inherited versus triggered asymmetry---is itself a contribution: it predicts that regulators should distinguish between asymmetries they will \textit{create} (triggered, $A_i > 0$) and asymmetries they will \textit{inherit} (pre-existing, $\phi_i^{(0)} > 0$), because the policy response differs fundamentally.
+
+
+% ============================================================
+\section{Migration Pathways Under the CSRD}
+\label{sec:csrd}
+% ============================================================
+
+The three doors introduced above deserve closer examination. Each represents a distinct migration pathway with its own institutional dynamics, timeline, and empirical signatures.
+
+\subsection{Door 1: Who Checks the Checkers?}
+
+Imagine hiring a building inspector who is paid by the building owner. The inspector's incentive is to maintain the client relationship, not to find problems. This is the structure of CSRD assurance.
+
+Assurance providers are hired and paid by reporting firms. The initial standard is ``limited assurance''---the auditor certifies that nothing has come to their attention that contradicts the report. This is structurally weaker than ``reasonable assurance'' (the standard for financial statements), where the auditor actively verifies accuracy. The same Big Four firms that advise on CSRD implementation also audit the results---an interest conflict that mirrors the credit-rating failures preceding the 2008 financial crisis.
+
+The asymmetry that was compressed at the firm-reporting level migrates \textit{vertically} to the audit relationship: investors cannot observe audit quality, auditors face reputational costs only for \textit{detected} failures, and the principal-agent friction between investor and auditor is unregulated by the CSRD.
+
+\textbf{Estimated arrival:} $\tau_1 \approx 1$ year after CSRD activation (audit market adjustment time).
+
+\subsection{Door 2: The Telephone Game}
+
+A European automaker must report Scope-3 emissions---the emissions of its entire supply chain. But its Tier-3 supplier in Vietnam has no ERP system, no emission measurements, and no obligation under ESRS. The automaker estimates. The Tier-1 supplier aggregates the estimates. The investor reads ``450,000 tonnes CO$_2$'' and assumes it is measured. It is a game of telephone---\textit{Stille Post}---with estimation errors that compound multiplicatively across supply chain tiers.
+
+The CSRD mandates disclosure of supply chain data that does not exist in verifiable form. Firms respond with estimates, industry averages, and supplier self-reports---creating \textit{pseudo-precision}: numbers that look like data but carry the uncertainty of guesses.
+
+The asymmetry migrates \textit{horizontally} to the supply chain boundary: the gap between what is reported and what is real widens precisely where measurement infrastructure is weakest.
+
+\textbf{Estimated arrival:} $\tau_2 \approx 2$--$3$ years (supply chain adaptation period).
+
+\subsection{Door 3: Too Much Data, Too Little Clarity}
+
+A CSRD-compliant sustainability report for a large firm may exceed 200 pages of standardized data. An institutional investor with a dedicated ESG team can process this. A retail investor cannot. A pension fund with Bloomberg access can compare reports across firms; a small-town savings bank cannot.
+
+The volume of disclosure creates a Grossman-Stiglitz problem (1980) at the investor level: the cost of processing information now exceeds the benefit for most market participants. Intermediaries---ESG rating agencies, index providers, data aggregators---emerge to bridge the gap. But these intermediaries introduce \textit{new} asymmetries: their methodologies are proprietary, their incentives are imperfectly aligned with investor welfare, and their assessments notoriously diverge. Berg, K\"olbel, and Rigobon (2022) show that the correlation between major ESG raters is approximately $$r = 0.54$$---compared to $r > 0.95$ for credit ratings.
+
+The asymmetry migrates \textit{downstream} to the processing layer: the gap between those who can interpret the data and those who cannot \textit{widens} as disclosure volume increases.
+
+\textbf{Estimated arrival:} $\tau_3 \approx 1$--$2$ years (investor tooling development).
+
+\subsection{When the Waves Collide}
+
+The CSRD update cycle ($\sim$2 years) is approximately synchronized with EU audit rotation requirements ($\sim$4 years $\approx 2 \times$ CSRD cycle) and supply chain adaptation periods ($\sim$2--3 years). When multiple regulatory cycles come into phase simultaneously---estimated around 2028--2030---the potential for pro-cyclical amplification of asymmetry waves increases. This is analogous to resonance in physical systems: small perturbations at the natural frequency produce large-amplitude oscillations.
+
+
+% ============================================================
+\section{Empirical Signatures}
+\label{sec:empirics}
+% ============================================================
+
+The Asymmetry Migration Principle generates a testable meta-prediction: if asymmetry is migrating to the three identified domains, then academic research attention---as a revealed-preference indicator of where problems are growing---should shift disproportionately toward those domains. Using the OpenAlex database (250M+ scholarly works), I construct three time series that proxy for the \textit{growth rate of research problems} in each migration layer.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig1_migration_evidence_v2.pdf}
+\caption{Academic research attention as a proxy for asymmetry migration. \textbf{(a)} Processing layer: ratio of papers on ``ESG rating disagreement'' to papers on ``ESG disclosure'' (pre-2020 mean: 0.001; post-2020 mean: 0.028; Welch $t = -4.1$, $p = 0.008$; Spearman $\rho = 0.97$). \textbf{(b)} Supply chain layer: Scope-3 to Scope-1/2 research ratio remains elevated ($> 1.6$ throughout; 2025 ratio: 2.14). \textbf{(c)} Audit layer: absolute count of papers on sustainability assurance ($+502\%$ growth 2020--2025; Welch $t = -2.4$, $p = 0.057$; Spearman $\rho = 0.98$). Dashed line marks 2020 (CSRD legislative process and intensified ESG regulation). Source: OpenAlex API, queried 2026-03-14.}
+\label{fig:migration}
+\end{figure}
+
+\textit{Test 1: Processing Layer.} The ratio of research on ESG rating disagreement to total ESG disclosure research increased from effectively zero (pre-2020 mean: 0.001) to 0.028 post-2020, a highly significant shift (Welch $t = -4.1$, $p = 0.008$; Spearman $\rho = 0.97$, $p < 0.001$). By 2025, 531 papers explicitly addressed rating disagreement---up from zero in 2015. This is consistent with Proposition~\ref{prop:migration}: as disclosure volume increases, disagreement at the intermediary level grows disproportionately.
+
+\textit{Test 2: Supply Chain Layer.} Scope-3 research has consistently exceeded Scope-1/2 research throughout the sample period (ratio $> 1.6$), with a notable acceleration to 2.14 in 2025 after a mid-decade dip ($\rho = -0.43$, n.s.). The persistently high ratio reflects that supply chain data quality---the horizontal migration channel---has been the binding constraint on disclosure credibility even before the CSRD, and is intensifying.
+
+\textit{Test 3: Audit Layer.} Research on sustainability assurance grew by 502\% from 2020 to 2025 (Welch $t = -2.4$, $p = 0.057$; Spearman $\rho = 0.98$, $p < 0.001$). The count rose from 198 papers in 2020 to 1,191 in 2025. Academic attention is migrating precisely where the Asymmetry Migration Principle predicts audit-level information problems are accumulating.
+
+\textit{Extended evidence.} Three additional bibliometric series corroborate the migration pattern (Figure~\ref{fig:extended}). Research on \textit{greenwashing} exploded from 636 papers (2015) to 10,901 (2025; $\rho = 1.00$, $p < 0.001$)---a revealed-preference indicator that the academic community perceives growing gaps between reported and actual sustainability. Papers on \textit{ESG data quality} concerns, though smaller in absolute number, show accelerating growth from zero (pre-2019) to 61 (2025). Research on \textit{double materiality}---the regulatory response to the waterbed problem---grew from 21 (2015) to 741 (2025; $\rho = 0.97$, $p < 0.001$).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig2_extended_evidence.pdf}
+\caption{Extended bibliometric evidence. Top row: original migration channels (reproduced from Figure~\ref{fig:migration}). Bottom row: \textbf{(d)} greenwashing research as a proxy for perceived disclosure--reality gaps; \textbf{(e)} ESG data quality concerns; \textbf{(f)} double materiality research as the regulatory system's response. Source: OpenAlex API, queried 2026-03-14.}
+\label{fig:extended}
+\end{figure}
+
+These results constitute indirect evidence: they show that the academic community, through its research agenda, is responding to exactly the migration pathways identified in Section~\ref{sec:csrd}. They do not establish causation between the CSRD specifically and the observed shifts. Direct causal tests---using CSRD implementation dates as quasi-experimental variation---will require post-2026 data and are outlined in the following section.
+
+\subsection{Non-Bibliometric Evidence: The Readiness Gap}
+
+Industry survey data provides complementary evidence for the migration mechanism. KPMG's Survey of Sustainability Reporting (2024) tracks assurance adoption across the world's largest companies since 2005 (Figure~\ref{fig:assurance}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig3_assurance_gap.pdf}
+\caption{\textbf{(a)} Sustainability assurance adoption among G250 and N100 companies, 2005--2024. Assurance rates have risen from 30\% to 69\% (G250), but the quality of assurance remains predominantly limited. \textbf{(b)} The CSRD readiness gap: 77\% of N100 companies report publicly on ESG, but only 29\% consider themselves ready for ESG audits, while 83\% find data collection challenging. Source: KPMG Survey of Sustainability Reporting 2024; KPMG ESG Assurance Maturity Index 2024.}
+\label{fig:assurance}
+\end{figure}
+
+The data reveals a structural gap that is precisely the waterbed signature at the firm level. Among N100 companies: 77\% now report publicly on ESG (up from 56\% in October 2023), 54\% obtain some form of assurance, but only 29\% are ready for ESG audits---and 83\% find data collection ``a significant challenge.'' The average company reports on 10.8 ESG metrics externally (up from 3.4), suggesting a tripling of disclosure volume without a commensurate increase in data infrastructure.
+
+At the supply chain level, the number of companies reporting Scope-3 emissions to CDP grew from 936 (2010) to 3,317 (2021), with European companies at 71\% reporting rates. Yet the CSRD's Wave~1 (approximately 11,000 companies filing first reports in 2025) mandates Scope-3 disclosure for firms whose supply chain data infrastructure is, by their own admission, unprepared.
+
+The pattern is consistent across all three doors: \textit{disclosure volume is increasing faster than the institutional capacity to verify it}. This is the waterbed in motion---asymmetry is being created at the audit and data-quality boundaries at the same rate it is being compressed at the reporting boundary.
+
+
+\subsection{Calibrating the Graph-Laplacian Model}
+\label{sec:calibration}
+
+The bibliometric time series from Section~\ref{sec:empirics} allow a direct calibration of the Laplacian model (Eq.~\ref{eq:decomposition}). I fit three parameters per domain---initial level $\phi_i^{(0)}$, effective decay rate $\lambda_i^{\text{eff}}$, and source amplitude $A_i$---plus two shared parameters: the regulatory onset $t_0$ and rise rate $k$. The fit minimizes the sum of squared residuals between the model and the normalized OpenAlex time series (500 random restarts, L-BFGS-B optimizer).
+
+\begin{table}[H]
+\centering
+\small
+\caption{Calibrated model parameters from OpenAlex data (2015--2025).}
+\label{tab:calibration}
+\begin{tabular}{lccccc}
+\toprule
+Domain & $\phi_i^{(0)}$ & $\lambda_i^{\text{eff}}$ & $\tau_i = 1/\lambda_i$ & $A_i$ & Type \\
+\midrule
+Processing  & $\approx 0$   & $1.00$  & 1.0\,yr   & 5.0 (largest)  & triggered \\
+Supply chain & $0.50$         & $0.09$  & 11.1\,yr  & 3.5            & inherited + triggered \\
+Audit       & $1.12$         & $0.07$  & 13.6\,yr  & 1.7            & triggered (slow) \\
+\midrule
+\multicolumn{6}{l}{Shared: onset $t_0 \approx 2023$, rise rate $k = 0.30$/yr} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three findings emerge from the calibration:
+
+\textit{First}, the three domains operate on \textit{radically different timescales}. The processing layer (ESG rating disagreement) has a relaxation time of approximately one year---intermediaries adapt quickly to new data. The supply chain has a relaxation time of 11 years---physical infrastructure changes slowly. The audit layer is slowest at nearly 14 years---institutional norms and professional standards are the most inertial. The ratio of fastest to slowest timescale exceeds 13:1.
+
+\textit{Second}, the model-implied regulatory onset is $t_0 \approx 2023$, approximately one year \textit{before} the formal CSRD activation. This is consistent with forward-looking behavior: markets, academics, and institutions respond to expected regulation, not implemented regulation.
+
+\textit{Third}, the inherited-versus-triggered decomposition is empirically grounded (Figure~\ref{fig:decomposition}). The supply chain channel carries substantial pre-existing asymmetry ($\phi^{(0)} = 0.50$), confirming that Scope-3 data quality was a binding constraint before the CSRD. The processing channel starts near zero and is almost entirely CSRD-triggered. The audit channel has moderate pre-existing structure but is dominated by the triggered component after 2023.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig5_calibration.pdf}
+\caption{Calibrated Laplacian model. \textbf{(a)} Model fit (lines) versus OpenAlex data (dots). $R^2$: Processing = 0.97, Audit = 0.96, Supply chain = 0.34. The supply chain's low $R^2$ reflects its non-monotonic dynamics, which the diagonal model cannot capture (see Limitations). \textbf{(b)} Forward prediction to 2032, showing total system asymmetry peaking around 2032 as institutional adaptation saturates. \textbf{(c)} Decomposition into inherited (dashed) and triggered (solid) components. Supply chain is predominantly inherited; processing and audit are predominantly triggered. \textbf{(d)} System stuckness score $S(t)$, defined as total unregulated asymmetry minus verification capacity. The KPMG readiness gap ($S = 0.48$ in 2024) is marked. The system is becoming stuckier, not freer.}
+\label{fig:decomposition}
+\end{figure}
+
+The fit quality is strong for the audit and processing channels ($R^2 = 0.96$ and $0.97$) but weak for supply chain ($R^2 = 0.34$). This is informative: the diagonal model treats each channel independently, but the supply chain is coupled to both other channels (Scope-3 data quality affects rating disagreement; audit quality affects supply chain verification). The poor fit is a signature of the \textit{off-diagonal coupling terms} in the full Laplacian---precisely the terms that generate the waterbed dynamics. A fully coupled model requires panel data on cross-channel flows, which I leave to future work.
+
+\subsection{The Stuckness Diagnostic}
+
+The KPMG Survey of Sustainability Reporting (2024) provides an independent validation at the firm level. I define a system stuckness score as the gap between disclosure volume and verification capacity:
+\begin{equation}
+S(t) = C(t) - I(t),
+\label{eq:stuckness}
+\end{equation}
+where $C$ proxies for disclosure commitments (percentage of firms reporting publicly) and $I$ proxies for verification infrastructure (percentage audit-ready). Pre-CSRD (2023): $S = 0.56 - 0.20 = 0.36$. Post-CSRD (2024): $S = 0.77 - 0.29 = 0.48$ ($+33\%$). The system became \textit{more stuck}, not less: disclosure volume tripled (from 3.4 to 10.8 average metrics), but audit readiness grew only marginally. This is the waterbed in its simplest quantitative form.
+
+
+% ============================================================
+\section{Testable Predictions}
+\label{sec:predictions}
+% ============================================================
+
+\textbf{Prediction 1} (Audit Layer). Sustainability assurance quality, proxied by auditor-reported qualifications and regulatory enforcement actions, will decline in the first three years of CSRD implementation, despite increasing disclosure volume.
+
+\textbf{Falsification:} Assurance quality improves monotonically with CSRD adoption.
+
+\textbf{Prediction 2} (Supply Chain). The cross-reporter variance of Scope-3 emission estimates for identical suppliers will be significantly higher than the variance of Scope-1 and Scope-2 estimates. The gap will widen after CSRD implementation.
+
+\textbf{Falsification:} Scope-3 estimates converge across reporters as CSRD matures.
+
+\textbf{Prediction 3} (Processing Layer). ESG rating disagreement (measured as the cross-rater standard deviation) will increase after CSRD implementation, not decrease, because additional disclosure dimensions create additional dimensions of methodological divergence.
+
+\textbf{Falsification:} Rating disagreement decreases significantly post-CSRD.
+
+\textbf{Prediction 4} (Propagation Timing). The original formulation predicted sequential emergence with lags $\tau_1 < \tau_3 < \tau_2$, reflecting the institutional adjustment speeds of the respective layers.
+
+\textbf{Falsification:} Migration effects appear simultaneously or in a different order.
+
+\subsection{Prediction 4: Partially Falsified, Then Refined}
+
+The arrival-time analysis deserves separate treatment because the data partially falsify the original prediction---and in doing so, sharpen the theory.
+
+\textbf{Method.} I apply three changepoint detection methods to the OpenAlex time series: (i) first year of $>50\%$ year-over-year growth, (ii) optimal Welch-$t$ split, and (iii) CUSUM departure from the pre-period mean. Results are summarized in Figure~\ref{fig:arrival} and Table~\ref{tab:arrival}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig4_arrival_times.pdf}
+\caption{\textbf{(a)} Growth trajectories by migration channel (normalized). Supply chain research was elevated throughout the sample; processing layer research emerged from zero around 2019; audit research accelerated from 2022. \textbf{(b)} Year-over-year growth rates. Numbers mark the first year of $>50\%$ growth for each channel. Source: OpenAlex API, queried 2026-03-14.}
+\label{fig:arrival}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Arrival time estimates by detection method.}
+\label{tab:arrival}
+\begin{tabular}{lccc}
+\toprule
+Method & Audit ($\tau_1$) & Processing ($\tau_3$) & Supply chain ($\tau_2$) \\
+\midrule
+First $>50\%$ YoY growth & 2022 & 2019 & 2020 \\
+Optimal changepoint (Welch-$t$) & 2023 & 2023 & 2023 \\
+CUSUM departure & 2022 & 2021 & 2020 \\
+\midrule
+\textit{Predicted} & $\sim$2021 & $\sim$2021--22 & $\sim$2022--23 \\
+\textit{Observed consensus} & $\sim$2022 & $\sim$2019--21 & pre-existing \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{What the data show.} The predicted ordering $\tau_1 < \tau_3 < \tau_2$ is \textit{reversed}. The observed sequence is:
+\begin{enumerate}[nosep]
+\item \textit{Supply chain} ($\tau_2$): Scope-3 research already exceeded Scope-1/2 research by a ratio of $>1.6$ \textit{before} the CSRD was even proposed. This is pre-existing asymmetry, not CSRD-triggered migration.
+\item \textit{Processing} ($\tau_3$): ESG rating disagreement research emerged from zero around 2019, catalyzed by the growing ESG data ecosystem and crystallized by Berg, K\"olbel, and Rigobon's influential 2022 paper. First $>50\%$ growth: 2019.
+\item \textit{Audit} ($\tau_1$): Sustainability assurance research accelerated from 2022, coinciding precisely with the CSRD's adoption. First $>50\%$ growth: 2022.
+\end{enumerate}
+
+\textbf{Interpretation.} The reversal is informative, not damaging. It reveals that the waterbed has \textit{two distinct dynamics}: (a) \textit{pre-existing asymmetry} that the regulation inherits (supply chain), and (b) \textit{regulation-triggered migration} that the intervention creates (processing, audit). Among the CSRD-triggered channels, the ordering $\tau_3 \approx 2019\text{--}2021 < \tau_1 \approx 2022$ is consistent with the predicted lag structure: processing-layer problems (rating disagreement) emerge before audit-layer problems, because intermediaries react to data volume faster than audit institutions adapt to new mandates.
+
+The refined prediction is:
+\begin{equation}
+\underbrace{\tau_2}_{\text{pre-existing}} \;<\; \underbrace{\tau_3 \;<\; \tau_1}_{\text{CSRD-triggered}}
+\end{equation}
+This decomposition---inherited vs.\ triggered asymmetry---is itself a contribution: it suggests that regulators should distinguish between asymmetries they will \textit{create} and asymmetries they will \textit{inherit}, because the policy response differs fundamentally.
+
+
+% ============================================================
+\section{Implications for Regulatory Design}
+\label{sec:implications}
+% ============================================================
+
+The Asymmetry Migration Principle does not argue against regulation. It argues for \textit{regulation that anticipates migration}. The policy implications are threefold:
+
+\textit{First:} Regulatory impact assessment should evaluate the \textit{system-wide redistribution} of asymmetry, not only the local effect within the regulated domain. The CSRD's success should not be measured by the improvement in firm-level disclosure quality alone, but by the net change in total system-wide informational disorder.
+
+\textit{Second:} Migration pathways should be identified \textit{before} regulatory activation and addressed with complementary measures. For the CSRD, this means: strengthening assurance standards from limited to reasonable assurance (Door 1), investing in supply chain data infrastructure (Door 2), and regulating the ESG intermediary market (Door 3).
+
+\textit{Third:} Regulatory cycles should be designed to \textit{avoid} synchronization with adjacent institutional cycles. Staggered update cycles reduce the risk of resonance-driven amplification.
+
+
+% ============================================================
+\section{Relation to the Literature}
+\label{sec:literature}
+% ============================================================
+
+The paper contributes to three literatures. First, it extends the information economics of mandatory disclosure (Verrecchia, 1983, 2001; Christensen, Hail, and Leuz, 2021) by introducing a \textit{dynamic, graph-based} perspective: disclosure regulation is not a one-shot equilibrium adjustment but a diffusion process on an institutional graph, with empirically measurable relaxation times. The graph-Laplacian formulation (Chung 1997) provides the mathematical precision that the verbal ``waterbed'' metaphor has lacked. Second, it reconciles contradictory empirical findings on ESG disclosure effectiveness (Krueger et al., 2024; Boulton, 2024) by showing that both findings are valid measurements of different nodes in the same coupled system. Third, it connects to the broader literature on regulatory unintended consequences (Goodhart, 1975; Stiglitz, 2010) by providing a calibrated model---not just a mechanism---through which unintended effects are generated and propagated.
+
+The framework departs from Spence (1973) in a fundamental way. Spence models signaling as a game with a stable equilibrium: the informed party sends a costly signal, the uninformed party updates, and the market reaches a new equilibrium. The graph-Laplacian framework has no stable equilibrium in the presence of ongoing regulation. Regulation injects order (negative source term) in one domain, but the Laplacian coupling redistributes disorder to adjacent domains with domain-specific relaxation times spanning an order of magnitude (1--14 years in our calibration). The relevant analogy is not a game with a solution but a fluid on a network: regulation redirects the flow, the eigenmodes determine the speed, and the spectral gap sets the half-life of the intervention.
+
+
+% ============================================================
+\section{Boundaries}
+\label{sec:boundaries}
+% ============================================================
+
+Three limitations should be acknowledged. First, the bibliometric proxies measure \textit{academic attention}, not information asymmetry directly; the identification assumption is that research intensity reveals where informational problems are growing. Direct measures (bid-ask spreads by domain, analyst disagreement by reporting layer) require post-2026 CSRD implementation data. Second, the diagonal approximation of the Laplacian model treats each domain independently, which explains the poor fit for supply chain ($R^2 = 0.34$); a fully coupled model requires cross-channel panel data. Third, the conservation principle is an approximation: in open systems with genuine information creation (e.g., technological innovation), total entropy can decrease. The principle holds most strongly for redistributive interventions.
+
+
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% ============================================================
+
+Krueger et al.\ found that mandatory ESG disclosure reduces information asymmetry. Boulton (2024) found that it does not. This paper has shown that both are right---they are measuring different nodes of the same institutional graph.
+
+The graph-Laplacian model makes this precise: regulation is a source term that compresses asymmetry locally; the Laplacian coupling redistributes it to adjacent domains with domain-specific relaxation times ranging from 1 year (processing) to 14 years (audit). The KPMG readiness gap---disclosure at 77\%, audit readiness at 29\%---shows the waterbed in its simplest quantitative form: the system is 33\% stuckier than before the CSRD.
+
+The question for the next generation of regulatory design is not ``How do we eliminate asymmetry?'' That question has no answer---you cannot flatten a waterbed.
+
+The question is: ``Where do we want the water to go, and how fast will it get there?'' The spectral gap of the institutional graph gives the answer.
+
+\textbf{Code and data.} Replication code for the bibliometric queries, Laplacian calibration, and all figures is available at \url{https://github.com/hakvinv/asymmetry-migration}.
+
+
+% ============================================================
+\begin{thebibliography}{99}
+
+\bibitem{akerlof1970}
+G.~A.~Akerlof,
+\textit{The Market for ``Lemons'': Quality Uncertainty and the Market Mechanism},
+Quarterly Journal of Economics \textbf{84}(3) (1970) 488--500.
+
+\bibitem{berg2022}
+F.~Berg, J.~F.~K\"olbel, R.~Rigobon,
+\textit{Aggregate Confusion: The Divergence of ESG Ratings},
+Review of Finance \textbf{26}(6) (2022) 1315--1344.
+
+\bibitem{christensen2021}
+H.~B.~Christensen, L.~Hail, C.~Leuz,
+\textit{Mandatory CSR and Sustainability Reporting: Economic Analysis and Literature Review},
+Review of Accounting Studies \textbf{26} (2021) 1176--1248.
+
+\bibitem{genakos2011}
+C.~Genakos, T.~M.~Valletti,
+\textit{Testing the ``Waterbed'' Effect in Mobile Telephony},
+Journal of the European Economic Association \textbf{9}(6) (2011) 1114--1142.
+
+\bibitem{chung1997}
+F.~R.~K.~Chung,
+\textit{Spectral Graph Theory},
+CBMS Regional Conference Series in Mathematics, No.~92, AMS (1997).
+
+\bibitem{goodhart1975}
+C.~A.~E.~Goodhart,
+\textit{Problems of Monetary Management: The U.K.\ Experience},
+Papers in Monetary Economics, Reserve Bank of Australia (1975).
+
+\bibitem{grossman1980}
+S.~J.~Grossman, J.~E.~Stiglitz,
+\textit{On the Impossibility of Informationally Efficient Markets},
+American Economic Review \textbf{70}(3) (1980) 393--408.
+
+\bibitem{krueger2024}
+P.~Krueger, Z.~Sautner, D.~Y.~Tang, R.~Zhong,
+\textit{The Effects of Mandatory ESG Disclosure Around the World},
+Journal of Accounting Research \textbf{62}(5) (2024) 1795--1847.
+
+\bibitem{leuz2016}
+C.~Leuz, P.~D.~Wysocki,
+\textit{The Economics of Disclosure and Financial Reporting Regulation},
+Journal of Accounting Research \textbf{54}(2) (2016) 525--622.
+
+\bibitem{manne2007}
+G.~A.~Manne,
+\textit{The Hydraulic Theory of Disclosure Regulation and Other Costs of Disclosure},
+Alabama Law Review \textbf{58} (2007) 473--511.
+
+\bibitem{boulton2024}
+T.~J.~Boulton,
+\textit{Mandatory ESG Disclosure, Information Asymmetry, and Litigation Risk: Evidence from Initial Public Offerings},
+European Financial Management (2024).
+
+\bibitem{rothschild1976}
+M.~Rothschild, J.~E.~Stiglitz,
+\textit{Equilibrium in Competitive Insurance Markets},
+Quarterly Journal of Economics \textbf{90}(4) (1976) 629--649.
+
+\bibitem{schiff2008}
+A.~Schiff,
+\textit{The ``Waterbed'' Effect and Price Regulation},
+Review of Network Economics \textbf{7}(3) (2008) 392--414.
+
+\bibitem{shannon1948}
+C.~E.~Shannon,
+\textit{A Mathematical Theory of Communication},
+Bell System Technical Journal \textbf{27}(3) (1948) 379--423.
+
+\bibitem{spence1973}
+M.~Spence,
+\textit{Job Market Signaling},
+Quarterly Journal of Economics \textbf{87}(3) (1973) 355--374.
+
+\bibitem{stiglitz2010}
+J.~E.~Stiglitz,
+\textit{Freefall: America, Free Markets, and the Sinking of the World Economy},
+W.~W.~Norton (2010).
+
+\bibitem{verrecchia1983}
+R.~E.~Verrecchia,
+\textit{Discretionary Disclosure},
+Journal of Accounting and Economics \textbf{5} (1983) 179--194.
+
+\bibitem{verrecchia2001}
+R.~E.~Verrecchia,
+\textit{Essays on Disclosure},
+Journal of Accounting and Economics \textbf{32} (2001) 97--180.
+
+\end{thebibliography}
+
+\end{document}
